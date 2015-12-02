@@ -8,12 +8,12 @@ var userSchema = new mongoose.Schema({
     unique: true,
     validate: /[a-zA-Z0-9]/
   },
-  // email: {
-  //   type: String
-  //   // required: true,
-  //   // unique: true,
-  //   // validate: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-  // },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    validate: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+  },
   name: {
     firstName: {
       type: String,
