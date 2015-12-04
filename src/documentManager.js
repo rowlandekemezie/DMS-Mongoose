@@ -3,62 +3,63 @@ var strftime = require('strftime');
 
 // model instancies
 var User = model.User,
-    Role = model.Role,
-    Document = model.Document;
+  Role = model.Role,
+  Document = model.Document;
 
- /**
+/**
  * [method to create  User if it does not exist]
-  * @param  {[STRING]}   userName     [a unique username to be supplied]
-  * @param  {[STRING]}   email        [a unique email to be supplied]
-  * @param  {[STRING]}   firstName    [user's firstName must be provided]
-  * @param  {[STRING]}   lastName     [user's lastName must be provided]
-  * @param  {[STRING]}   role         [a role must be provided for succesful registration]
-  * @param  {]STRING]}   password     [the user provides a password]
-  * @param  {STRING} cb               [the callback reports to return based on the outcome]
-  * @return {[JSON]}                  [a json object of the new user is returned on success]
-  */
+ * @param  {[STRING]}   userName     [a unique username to be supplied]
+ * @param  {[STRING]}   email        [a unique email to be supplied]
+ * @param  {[STRING]}   firstName    [user's firstName must be provided]
+ * @param  {[STRING]}   lastName     [user's lastName must be provided]
+ * @param  {[STRING]}   role         [a role must be provided for succesful registration]
+ * @param  {]STRING]}   password     [the user provides a password]
+ * @param  {STRING} cb               [the callback reports to return based on the outcome]
+ * @return {[JSON]}                  [a json object of the new user is returned on success]
+ */
 var createUser = function(userName, email, firstName, lastName, role, password, cb) {
- if (!role) {
-  cb('Please provide a role to continue', null);
- } else {
-  return Role.findOne({
-   title: role
-  }).then(function(rol) {
-   if (rol) {
-    return User.findOne({
-     userName: userName
-    }).then(function(user) {
-     if (!user) {
-      if (firstName && lastName) {
-       var newUser = {
-        email: email,
-        userName: userName,
-        name: {
-         firstName: firstName,
-         lastName: lastName
-        },
-        role: role,
-        password: password
-       };
-       User.create(newUser, function(err, nuser) {
-        if (err) {
-         cb(err, null);
-        } else {
-         cb(null, nuser);
-        }
-       });
+  if (!role) {
+    cb('Please provide a role to continue', null);
+  } else {
+    return Role.findOne({
+      title: role
+    }).then(function(roles) {
+      if (roles) {
+        return User.findOne({
+          userName: userName,
+          email: email
+        }).then(function(users) {
+          if (!users) {
+            if (firstName && lastName) {
+              var newUser = {
+                email: email,
+                userName: userName,
+                name: {
+                  firstName: firstName,
+                  lastName: lastName
+                },
+                role: role,
+                password: password
+              };
+              User.create(newUser, function(err, nuser) {
+                if (err) {
+                  cb(err, null);
+                } else {
+                  cb(null, nuser);
+                }
+              });
+            } else {
+              cb("Please, provide firstName and lastName", null);
+            }
+          } else {
+            cb("user already exist", null);
+          }
+        });
       } else {
-       cb("Please, provide firstName and lastName", null);
+        cb("role does not exist", null);
       }
-     } else {
-      cb("user already exist", null);
-     }
     });
-   } else {
-    cb("role does not exist", null);
-   }
-  });
- }
+  }
 };
 
 /**
@@ -68,16 +69,16 @@ var createUser = function(userName, email, firstName, lastName, role, password, 
  * @return {[JSON]}      [a json object of new user is returned on success]
  */
 var getAUser = function(userName, cb) {
- return User.findOne({
-   userName: userName
-  })
-  .then(function(user) {
-   if (user) {
-    cb(null, user);
-   } else {
-    cb("user does not exist", null);
-   }
-  });
+  return User.findOne({
+      userName: userName
+    })
+    .then(function(user) {
+      if (user) {
+        cb(null, user);
+      } else {
+        cb("user does not exist", null);
+      }
+    });
 };
 
 /**
@@ -87,41 +88,41 @@ var getAUser = function(userName, cb) {
  * @return {[JSON]}      [a json object  of all the users is returned on success]
  */
 var getAllUsers = function(cb) {
- return User.find({})
-  .exec(function(err, users) {
-   if (err) {
-    cb(err, null);
-   } else {
-    cb(null, users);
-   }
-  });
+  return User.find({})
+    .exec(function(err, users) {
+      if (err) {
+        cb(err, null);
+      } else {
+        cb(null, users);
+      }
+    });
 };
 
 /**
-*  [ method to create A role if it does not exist]
-* @method createRole
-* @param  {[STRING]} role [a role to be created must be supplied]
-* @param  {Function} cb       [a callback for the method's return value]
-* @return {[JSON]}         [returns a json object of the new role created on success]
-  */
+ *  [ method to create A role if it does not exist]
+ * @method createRole
+ * @param  {[STRING]} role [a role to be created must be supplied]
+ * @param  {Function} cb       [a callback for the method's return value]
+ * @return {[JSON]}         [returns a json object of the new role created on success]
+ */
 var createRole = function(role, cb) {
- Role.findOne({
-  title: role
- }).then(function(rol) {
-  if (rol) {
-   cb("role exist", null);
-  } else {
-   Role.create({
+  Role.findOne({
     title: role
-   }, function(err, result) {
-    if (err) {
-     cb(err, null);
+  }).then(function(rol) {
+    if (rol) {
+      cb("role exist", null);
     } else {
-     cb(null, result);
+      Role.create({
+        title: role
+      }, function(err, result) {
+        if (err) {
+          cb(err, null);
+        } else {
+          cb(null, result);
+        }
+      });
     }
-   });
-  }
- });
+  });
 };
 
 /**
@@ -132,16 +133,16 @@ var createRole = function(role, cb) {
  * @return {[JSON]}         [returns a json object of the role record]
  */
 var getARole = function(role, cb) {
- Role.findOne({
-   title: role
-  })
-  .then(function(rol) {
-   if (rol)
-    cb(null, rol);
-   else {
-    cb('does not exist', null);
-   }
-  });
+  Role.findOne({
+      title: role
+    })
+    .then(function(rol) {
+      if (rol)
+        cb(null, rol);
+      else {
+        cb('Role does not exist', null);
+      }
+    });
 };
 
 /**
@@ -151,11 +152,14 @@ var getARole = function(role, cb) {
  * @return {[JSON]} [returns the json object of all the record in the table]
  */
 var getAllRoles = function(cb) {
- return Role.find()
-  .exec(function(err, roles) {
-   if (err) cb(err);
-   cb(null, roles);
-  });
+  return Role.find()
+    .exec(function(err, roles) {
+      if (err) {
+        cb(err, null);
+      } else {
+        cb(null, roles);
+      }
+    });
 };
 
 /**
@@ -167,30 +171,30 @@ var getAllRoles = function(cb) {
  * @return {[JSON]}               [description]
  */
 var createDocument = function(bookTitle, role, cb) {
- Role.findOne({
-  title: role
- }).then(function(rol) {
-  if (rol) {
-   Document.findOne({
-    docTitle: bookTitle
-   }).then(function(doc) {
-    if (!doc) {
-     var newDoc = {
-      docTitle: bookTitle,
-      accessTo: role,
-      datePublished: new Date()
-     };
-     Document.create(newDoc, function(err, ndoc) {
-      cb(null, ndoc);
-     });
+  Role.findOne({
+    title: role
+  }).then(function(rol) {
+    if (rol) {
+      Document.findOne({
+        docTitle: bookTitle
+      }).then(function(doc) {
+        if (!doc) {
+          var newDoc = {
+            docTitle: bookTitle,
+            accessTo: role,
+            datePublished: new Date()
+          };
+          Document.create(newDoc, function(err, ndoc) {
+            cb(null, ndoc);
+          });
+        } else {
+          cb("document already exist", null);
+        }
+      });
     } else {
-     cb("document already exist", null);
+      cb("Role does not exist", null);
     }
-   });
-  } else {
-   cb("Role does not exist", null);
-  }
- });
+  });
 };
 
 /**
@@ -200,18 +204,18 @@ var createDocument = function(bookTitle, role, cb) {
  * @return {[JSON]}       [returns a json object of all the documents in the table]
  */
 var getAllDocuments = function(limit, cb) {
- Document.find()
-  .sort({
-   datePublished: -1
-  })
-  .limit(limit)
-  .exec(function(err, docs) {
-   if (err) {
-    cb(err, null);
-   } else {
-    cb(null, docs);
-   }
-  });
+  Document.find()
+    .sort({
+      datePublished: -1
+    })
+    .limit(limit)
+    .exec(function(err, docs) {
+      if (err) {
+        cb(err, null);
+      } else {
+        cb(null, docs);
+      }
+    });
 };
 
 /**
@@ -222,20 +226,20 @@ var getAllDocuments = function(limit, cb) {
  * @return {[JSON]}       [returns the rows that matches the query role]
  */
 var getDocByRole = function(role, limit, cb) {
- return Document.find({
-   accessTo: role
-  })
-  .sort({
-   datePublished: -1
-  })
-  .limit(limit)
-  .exec(function(err, docs) {
-   if (err) {
-    cb(err, null);
-   } else {
-    cb(null, docs);
-   }
-  });
+  return Document.find({
+      accessTo: role
+    })
+    .sort({
+      datePublished: -1
+    })
+    .limit(limit)
+    .exec(function(err, docs) {
+      if (err) {
+        cb(err, null);
+      } else {
+        cb(null, docs);
+      }
+    });
 };
 
 /**
@@ -246,37 +250,29 @@ var getDocByRole = function(role, limit, cb) {
  * @return {[JSON]}       [returns the rows that matches the query date]
  */
 var getDocByDate = function(date, limit, cb) {
- return Document.find({
-   datePublished: date
-  })
-  .limit(limit)
-  .exec(function(err, docs) {
-   if (err) {
-    cb(err, null);
-   } else {
-    cb(null, docs);
-   }
-  });
+  return Document.find({
+      datePublished: date
+    })
+    .limit(limit)
+    .exec(function(err, docs) {
+      if (err) {
+        cb(err, null);
+      } else {
+        cb(null, docs);
+      }
+    });
 };
-
-// methods for RESTFUL API
-var dropAUser = function(userName, role, cb) {};
-var dropAllUsers = function(role, cb) {};
-var dropARole = function(role, cb) {};
-var dropAllRoles = function(cb) {};
-var dropAdocument = function(docTitle, role, cb) {};
-var dropAlldocuments = function(role, cb) {};
 
 // Export methods to expose them to other files
 module.exports = {
- createUser: createUser,
- getAUser: getAUser,
- getAllUsers: getAllUsers,
- createRole: createRole,
- getARole: getARole,
- getAllRoles: getAllRoles,
- createDocument: createDocument,
- getAllDocuments: getAllDocuments,
- getDocByDate: getDocByDate,
- getDocByRole: getDocByRole
+  createUser: createUser,
+  getAUser: getAUser,
+  getAllUsers: getAllUsers,
+  createRole: createRole,
+  getARole: getARole,
+  getAllRoles: getAllRoles,
+  createDocument: createDocument,
+  getAllDocuments: getAllDocuments,
+  getDocByDate: getDocByDate,
+  getDocByRole: getDocByRole
 };
