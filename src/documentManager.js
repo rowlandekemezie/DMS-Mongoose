@@ -182,7 +182,6 @@ var createDocument = function(bookTitle, role, cb) {
           var newDoc = {
             docTitle: bookTitle,
             accessTo: role,
-            datePublished: new Date()
           };
           Document.create(newDoc, function(err, ndoc) {
             cb(null, ndoc);
@@ -251,7 +250,7 @@ var getDocByRole = function(role, limit, cb) {
  */
 var getDocByDate = function(date, limit, cb) {
   return Document.find({
-      datePublished: date
+      createdAt: date
     })
     .limit(limit)
     .exec(function(err, docs) {
